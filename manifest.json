@@ -1,11 +1,11 @@
 {
-  "name": "Escolha Certa — Como devo pagar?",
+  "name": "Escolha Certa",
   "short_name": "Escolha Certa",
   "description": "Simulador PIX × Cartão: descubra a melhor forma de pagamento.",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#0e0f13",
-  "theme_color": "#4f8cff",
+  "background_color": "#080808",
+  "theme_color": "#f5c518",
   "orientation": "portrait-primary",
   "icons": [
     {
