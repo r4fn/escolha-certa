@@ -404,9 +404,22 @@
           <div class="card"><div class="tag">Cartão à vista (valor real)</div><div id="avistaReal" class="result">—</div></div>
           <div class="card"><div class="tag">Cartão parcelado (valor presente)</div><div id="parceladoReal" class="result">—</div></div>
         </div>
-        <div class="grid" style="margin-top:8px">
-          <div class="card"><div class="tag">Desconto mínimo para PIX valer</div><div id="descNecPix" class="result warn">—</div></div>
-          <div class="card"><div class="tag">Desconto mínimo para à vista valer</div><div id="descNecAvista" class="result warn">—</div></div>
+      </div>
+
+      <!-- Negociação -->
+      <div class="block-title">Negociação</div>
+      <div class="card" style="width:100%;max-width:560px">
+        <div class="grid">
+          <div class="card">
+            <div class="tag">Desconto mínimo para PIX valer</div>
+            <div id="descNecPix" class="result warn">—</div>
+            <div id="descNecPixValor" style="text-align:center;font-size:18px;font-weight:600;font-family:'DM Mono',monospace;color:var(--text2);margin-top:6px;padding-top:6px;border-top:1px solid var(--border2)">—</div>
+          </div>
+          <div class="card">
+            <div class="tag">Desconto mínimo para à vista valer</div>
+            <div id="descNecAvista" class="result warn">—</div>
+            <div id="descNecAvistaValor" style="text-align:center;font-size:18px;font-weight:600;font-family:'DM Mono',monospace;color:var(--text2);margin-top:6px;padding-top:6px;border-top:1px solid var(--border2)">—</div>
+          </div>
         </div>
       </div>
 
@@ -685,8 +698,27 @@
       el('parceladoReal').textContent = (nParcelas > 1) ? fmtBRL(parceladoPV) : '—';
 
       el('melhor').textContent = melhor;
-      el('descNecPix').textContent = isFinite(descNecPix)? ((descNecPix<0? '-':'') + (100*Math.abs(descNecPix)).toFixed(2).replace('.',',') + '%') : '—';
-      el('descNecAvista').textContent = isFinite(descNecAvista)? ((descNecAvista<0? '-':'') + (100*Math.abs(descNecAvista)).toFixed(2).replace('.',',') + '%') : '—';
+
+      // Negociação: arredonda % sempre para cima (2 casas) e calcula valor com desconto
+      function fmtDescNec(desc, valorBase) {
+        if(!isFinite(desc)) return { pct: '—', val: '—' };
+        const sinal = desc < 0 ? '-' : '';
+        const pctBruto = 100 * Math.abs(desc);
+        // arredonda para cima na 2ª casa decimal
+        const pctCeil = Math.ceil(pctBruto * 100) / 100;
+        const pctStr = sinal + pctCeil.toFixed(2).replace('.', ',') + '%';
+        const valorDesc = (valorBase > 0 && isFinite(pctCeil))
+          ? fmtBRL(valorBase * (1 - (desc < 0 ? -1 : 1) * pctCeil / 100))
+          : '—';
+        return { pct: pctStr, val: valorDesc };
+      }
+
+      const necPix = fmtDescNec(descNecPix, valor);
+      const necAvista = fmtDescNec(descNecAvista, valor);
+      el('descNecPix').textContent = necPix.pct;
+      el('descNecPixValor').textContent = necPix.val;
+      el('descNecAvista').textContent = necAvista.pct;
+      el('descNecAvistaValor').textContent = necAvista.val;
 
       const pmtTotalVal = (isFinite(pmtMes) && nAuto > 1) ? pmtMes * nAuto : NaN;
       const pmtTaxaVal = (isFinite(pmtTotalVal) && melhorVal > 0) ? (pmtTotalVal / melhorVal - 1) : NaN;
